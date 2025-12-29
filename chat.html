@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GeoAI OSM RAG Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    .topbar { padding: 10px; border-bottom: 1px solid #ddd; display: flex; gap: 8px; align-items: center; }
+    #map { height: 70vh; }
+    #log { padding: 10px; height: 30vh; overflow: auto; border-top: 1px solid #ddd; white-space: pre-wrap; }
+    input { padding: 6px; width: 280px; }
+    button { padding: 6px 10px; }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <label>Query:</label>
+    <input id="query" value="Find all bus stops in Lund" />
+    <label>Place:</label>
+    <input id="place" value="Lund" />
+    <button onclick="run()">Search</button>
+  </div>
+
+  <div id="map"></div>
+  <div id="log">Ready.</div>
+
+<script>
+  // Init map
+  const map = L.map('map').setView([55.7047, 13.1910], 12); // Lund default
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  let geoLayer = null;
+
+  function log(msg) {
+    const el = document.getElementById('log');
+    el.textContent = msg;
+  }
+
+  async function loadGeoJSON(url) {
+    const res = await fetch(url);
+    const gj = await res.json();
+
+    if (geoLayer) {
+      map.removeLayer(geoLayer);
+    }
+    geoLayer = L.geoJSON(gj, {
+      pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 4 })
+    }).addTo(map);
+
+    const bounds = geoLayer.getBounds();
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.2));
+  }
+
+  async function run() {
+    const query = document.getElementById('query').value;
+    const place = document.getElementById('place').value;
+
+    log("Running...");
+
+    const resp = await fetch("/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({query, place})
+    });
+
+    const data = await resp.json();
+
+    if (data.status !== "success") {
+      log("Error: " + JSON.stringify(data, null, 2));
+      return;
+    }
+
+    // show message + evidence
+    let text = data.message + "\n\nEvidence:\n";
+    for (const e of data.evidence || []) {
+      text += `- score=${e.score.toFixed(3)} ${e.key}=${e.value}\n  ${e.url}\n  ${e.snippet}\n`;
+    }
+    log(text);
+
+    // load geojson on map
+    await loadGeoJSON(data.geojson_url);
+  }
+
+  // auto run on load
+  run();
+</script>
+
+</body>
+</html>

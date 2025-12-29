@@ -1,0 +1,10 @@
+numpy
+pandas
+requests
+beautifulsoup4
+lxml
+
+sentence-transformers
+faiss-cpu
+
+flask
