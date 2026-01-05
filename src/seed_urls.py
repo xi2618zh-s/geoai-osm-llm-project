@@ -19,4 +19,20 @@ SEED_URLS = [
     # shop
     "https://wiki.openstreetmap.org/wiki/Tag:shop%3Dsupermarket",
     "https://wiki.openstreetmap.org/wiki/Tag:shop%3Dconvenience",
+
+   #flights
+    "https://wiki.openstreetmap.org/wiki/Tag:aeroway%3Daerodrome",
+    "https://wiki.openstreetmap.org/wiki/Tag:aeroway%3Dterminal",
+    "https://wiki.openstreetmap.org/wiki/Tag:aeroway%3Dairport",
+    
+    # railway
+    "https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation",
+    "https://wiki.openstreetmap.org/wiki/Tag:railway%3Dhalt",
+    
+    #others
+    "https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dpolice",
+    "https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dlibrary",
+    "https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dcinema",
+    "https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dpark",
+    "https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dswimming_pool",
 ]
